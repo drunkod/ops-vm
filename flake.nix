@@ -1,8 +1,11 @@
+
+
 {
   description = "Ops - Build and run nanos unikernels";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # Use latest nixpkgs-unstable which has Go 1.25+
+    nixpkgs.url = "github:NixOS/nixpkgs/7df7ff7d8e00218376575f0acdcc5d66741351ee";
     flake-utils.url = "github:numtide/flake-utils";
   };
 

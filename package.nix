@@ -5,7 +5,7 @@
   protobuf,
   protoc-gen-go,
   protoc-gen-go-grpc,
-  grpc-gateway,  # This provides both plugins!
+  grpc-gateway,
   buf,
   gnumake,
 }:
@@ -24,19 +24,17 @@ buildGoModule rec {
   proxyVendor = true;
   vendorHash = "sha256-M+2k7K4HDRP0Qo78t9H1Pg1XkIqrjjNAOTgF1kXJmMk=";
 
-  # Tools needed for 'make generate' (from docs: "For protobufs/grpc we use https://buf.build/")
   nativeBuildInputs = [
     protobuf
     protoc-gen-go
     protoc-gen-go-grpc
-    grpc-gateway  # Provides protoc-gen-grpc-gateway and protoc-gen-openapiv2
+    grpc-gateway
     buf
     gnumake
   ];
 
   env.GOWORK = "off";
 
-  # From docs: "make generate" to generate protobufs
   preBuild = ''
     echo "Running 'make generate' to create Protocol Buffer code..."
     make generate
@@ -50,7 +48,6 @@ buildGoModule rec {
     "-X github.com/nanovms/ops/lepton.Version=${version}"
   ];
 
-  # All provider tags
   tags = [
     "aws"
     "azure"
