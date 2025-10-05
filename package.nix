@@ -2,6 +2,12 @@
   lib,
   buildGoModule,
   fetchFromGitHub,
+  protobuf,
+  protoc-gen-go,
+  protoc-gen-go-grpc,
+  grpc-gateway,  # This provides both plugins!
+  buf,
+  gnumake,
 }:
 
 buildGoModule rec {
@@ -12,20 +18,28 @@ buildGoModule rec {
     owner = "nanovms";
     repo = "ops";
     rev = "36fcd46119fd5b3cc7c5a9128758927b58ddc9b7";
-    sha256 = lib.fakeHash;
+    sha256 = "sha256-8VRdeuXCkxo+0PioYb1pUsFBE+e+TgNIKD5t7vgmEmQ=";
   };
 
   proxyVendor = true;
-  vendorHash = lib.fakeHash; # Update this
+  vendorHash = "sha256-M+2k7K4HDRP0Qo78t9H1Pg1XkIqrjjNAOTgF1kXJmMk=";
+
+  # Tools needed for 'make generate' (from docs: "For protobufs/grpc we use https://buf.build/")
+  nativeBuildInputs = [
+    protobuf
+    protoc-gen-go
+    protoc-gen-go-grpc
+    grpc-gateway  # Provides protoc-gen-grpc-gateway and protoc-gen-openapiv2
+    buf
+    gnumake
+  ];
 
   env.GOWORK = "off";
 
-  # Skip the generate step if proto files are already committed
+  # From docs: "make generate" to generate protobufs
   preBuild = ''
-    # Check if generated files already exist
-    if [ ! -f "lepton/image_service.pb.go" ]; then
-      echo "Warning: Proto files not pre-generated, build may fail"
-    fi
+    echo "Running 'make generate' to create Protocol Buffer code..."
+    make generate
   '';
 
   subPackages = [ "." ];
@@ -36,6 +50,7 @@ buildGoModule rec {
     "-X github.com/nanovms/ops/lepton.Version=${version}"
   ];
 
+  # All provider tags
   tags = [
     "aws"
     "azure"
