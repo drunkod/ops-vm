@@ -31,18 +31,27 @@
             pkgs.qemu
           ];
           
-          shellHook = ''
-            echo "╔════════════════════════════════════════╗"
-            echo "║  Ops Development Environment           ║"
-            echo "╚════════════════════════════════════════╝"
-            echo ""
-            echo "Available commands:"
-            echo "  ops     - Build and run unikernels"
-            echo "  qemu    - QEMU emulator"
-            echo ""
-            echo "Ops version: $(ops version 2>&1 || echo 'checking...')"
-            echo "QEMU version: $(qemu-system-x86_64 --version | head -n1)"
-          '';
+			shellHook = ''
+			  echo "╔════════════════════════════════════════╗"
+			  echo "║  Ops Development Environment           ║"
+			  echo "╚════════════════════════════════════════╝"
+			  echo ""
+			  
+			  # Check if setup is needed
+			  if [ ! -d "$HOME/.ops/kernels" ] || [ -z "$(ls -A $HOME/.ops/kernels 2>/dev/null)" ]; then
+				 echo "⚠️  First time setup required!"
+				 echo "   Run: ops-setup"
+				 echo ""
+			  fi
+			  
+			  echo "Available commands:"
+			  echo "  ops-setup   - Download Nanos kernels (run once)"
+			  echo "  ops         - Build and run unikernels"
+			  echo "  qemu        - QEMU emulator"
+			  echo ""
+			  echo "Ops version: $(ops version 2>&1 | grep 'Ops version' || echo 'checking...')"
+			  echo "QEMU version: $(qemu-system-x86_64 --version | head -n1)"
+			'';
         };
 
         apps.default = {

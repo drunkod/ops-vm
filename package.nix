@@ -8,11 +8,31 @@
   grpc-gateway,
   buf,
   gnumake,
+  writeScriptBin,
 }:
 
-buildGoModule rec {
+let
+  opsSetup = writeScriptBin "ops-setup" ''
+    #!/bin/sh
+    set -e
+    
+    echo "🔧 Setting up Ops environment..."
+    
+    OPS_DIR="''${OPS_DIR:-$HOME/.ops}"
+    #mkdir -p "$OPS_DIR"/{kernels,images,packages,volumes,instances}
+    
+    echo "📦 Downloading Nanos kernel..."
+    ops update 0.1.54 || ops update
+    
+    echo ""
+    echo "✅ Setup complete!"
+    echo ""
+    echo "Kernel installed in: $OPS_DIR/kernels"
+  '';
+
+in buildGoModule rec {
   pname = "ops";
-  version = "unstable-2024-01-20";
+  version = "unstable-2025-10-05";
 
   src = fetchFromGitHub {
     owner = "nanovms";
@@ -49,24 +69,16 @@ buildGoModule rec {
   ];
 
   tags = [
-    "aws"
-    "azure"
-    "do"
-    "gcp"
-    "hyperv"
-    "ibm"
-    "linode"
-    "oci"
-    "openshift"
-    "openstack"
-    "proxmox"
-    "upcloud"
-    "vbox"
-    "vsphere"
-    "vultr"
+    "aws" "azure" "do" "gcp" "hyperv" "ibm" "linode" "oci"
+    "openshift" "openstack" "proxmox" "upcloud" "vbox" "vsphere" "vultr"
   ];
 
   doCheck = false;
+
+  # Install setup script alongside ops
+  postInstall = ''
+    cp ${opsSetup}/bin/ops-setup $out/bin/
+  '';
 
   meta = with lib; {
     description = "Build and run nanos unikernels";
